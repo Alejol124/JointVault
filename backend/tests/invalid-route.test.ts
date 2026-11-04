@@ -4,15 +4,15 @@ import app from "../src/app.js"; // Importas tu aplicación de Hono
 describe("Test #2 - Invalid Route handling", () => {
 
     it("Debería retornar un estado 404 para rutas no definidas", async () => {
-        // Simulamos una petición a una ruta que no existe
+        //We simulate a request to a non-existent route
         const response = await app.request("/ruta-inexistente", {
             method: "GET",
         });
 
-        // 1. Verificamos que el código de estado sea 404 (Not Found)
+        // 1. Verify thaat the status code is 404 (NOT FOUND)
         expect(response.status).toBe(404);
 
-        // 2. Verificamos que la respuesta sea un JSON con el mensaje de error esperado
+        // 2. Verify that the response is a JSON with the expected error message
         const body = await response.json();
         expect(body).toEqual({ error: "Not Found" });
     });

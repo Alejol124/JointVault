@@ -42,7 +42,7 @@
   },
   "include": [
     "src/**/*"
-  ],
+, "tests/connection.test.ts"  ],
   "exclude": [
     "node_modules",
     "tests"
