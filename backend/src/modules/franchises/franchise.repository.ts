@@ -16,6 +16,7 @@ export interface IFranchiseRepository {
     findAll(): Promise<Franchise[]>;
     findById(id: number): Promise<Franchise | null>;
     create(data: CreateFranchiseDTO): Promise<Franchise>;
+    delete(id: number): Promise<Franchise | null>;
 }
 
 // 3. Implementa la Interfaz con Genéricos
@@ -47,5 +48,13 @@ export class FranchiseRepository implements IFranchiseRepository {
             throw new Error("No se pudo crear la franquicia.");
         }
         return result.rows[0];
+    }
+
+    async delete(id: number): Promise<Franchise | null> {
+        const result = await pool.query<Franchise>(
+            'DELETE FROM franchises WHERE id = $1 RETURNING id, name, uses_arcs',
+            [id]
+        );
+        return result.rows[0] ?? null;
     }
 }

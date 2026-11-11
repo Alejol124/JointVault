@@ -10,7 +10,9 @@ const franchiseRepository = new FranchiseRepository();
 const franchiseService = new FranchiseService(franchiseRepository);
 const franchiseController = new FranchiseController(franchiseService);
 
-// Define the route for getting all franchises
 franchiseRouter.get("/", (c) => franchiseController.getAllFranchises(c));
+franchiseRouter.get("/:id", (c) => franchiseController.getById(c));
+franchiseRouter.post("/", (c) => franchiseController.create(c));
+
 
 export default franchiseRouter;

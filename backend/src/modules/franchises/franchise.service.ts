@@ -1,12 +1,61 @@
-import type { IFranchiseRepository, Franchise } from "./franchise.repository.js"
+import { error } from "node:console";
+import type { IFranchiseRepository, Franchise, CreateFranchiseDTO } from "./franchise.repository.js"
 
 export class FranchiseService {
 
-    constructor(private repository: IFranchiseRepository) { }
-    //We dont use async function here because we are not doing any async operations, 
-    // we are just returning the promise from the repository, find all already returns a promise
+    private franchiseRepository: IFranchiseRepository;
+
+    constructor(franchiseRepository: IFranchiseRepository) {
+        this.franchiseRepository = franchiseRepository;
+    }
+
     getAllFranchises(): Promise<Franchise[]> {
-        return this.repository.findAll();
+        return this.franchiseRepository.findAll();
+    }
+
+    async getById(id: number): Promise<Franchise | null> {
+        try {
+            const franchise = await this.franchiseRepository.findById(id);
+            if (franchise === null) {
+                throw new Error("The franchise does not exists")
+            }
+            return franchise;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async create(dto: CreateFranchiseDTO): Promise<Franchise | null> {
+        try {
+            const { name, uses_arcs } = dto;
+            if (!name || name.trim() === "") {
+                throw new Error("The franchise name is obligatory")
+            }
+
+            return await this.franchiseRepository.create({
+                name: name.trim(),
+                uses_arcs
+            });
+        } catch (error: any) {
+
+            if (error.code === '23505') {
+                throw new Error("Franchise: " + dto.name + " already exists");
+            }
+
+            throw error;
+        }
+    }
+
+    async delete(id: number): Promise<Franchise | null> {
+        try {
+            const franchiseToDelete = await this.franchiseRepository.delete(id);
+
+
+        } catch (error) {
+            console.log(error)
+
+        }
+        return null;
     }
 }
 
