@@ -21,13 +21,10 @@ export class FranchiseController {
     }
 
     async getById(c: Context): Promise<Response> {
-        let idParam = null;
+        let idParam;
+
         try {
             idParam = Number(c.req.param("id"));
-
-            if (!idParam) {
-                return c.json({ error: "Invalid franchise ID" }, 400);
-            }
 
             const franchise = await this.franchiseService.getById(idParam);
             return c.json(franchise, 200);

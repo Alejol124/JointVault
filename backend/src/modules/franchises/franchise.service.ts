@@ -1,11 +1,8 @@
-import { error } from "node:console";
 import type { IFranchiseRepository, Franchise, CreateFranchiseDTO } from "./franchise.repository.js"
 
 export class FranchiseService {
 
-    private franchiseRepository: IFranchiseRepository;
-
-    constructor(franchiseRepository: IFranchiseRepository) {
+    constructor(private franchiseRepository: IFranchiseRepository) {
         this.franchiseRepository = franchiseRepository;
     }
 
@@ -28,9 +25,6 @@ export class FranchiseService {
     async create(dto: CreateFranchiseDTO): Promise<Franchise | null> {
         try {
             const { name, uses_arcs } = dto;
-            if (!name || name.trim() === "") {
-                throw new Error("The franchise name is obligatory")
-            }
 
             return await this.franchiseRepository.create({
                 name: name.trim(),

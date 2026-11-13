@@ -19,10 +19,9 @@ export interface IFranchiseRepository {
     delete(id: number): Promise<Franchise | null>;
 }
 
-// 3. Implementa la Interfaz con Genéricos
 export class FranchiseRepository implements IFranchiseRepository {
     async findAll(): Promise<Franchise[]> {
-        // Se añade <Franchise> para que result.rows sea de tipo Franchise[]
+        
         const result = await pool.query<Franchise>(
             'SELECT id, name, uses_arcs FROM franchises ORDER BY id ASC'
         );
@@ -45,7 +44,7 @@ export class FranchiseRepository implements IFranchiseRepository {
         );
 
         if (!result.rows[0]) {
-            throw new Error("No se pudo crear la franquicia.");
+            throw new Error("The franchise could not be created.");
         }
         return result.rows[0];
     }
