@@ -1,60 +1,34 @@
-//FranchiseController.ts
 import type { Context } from "hono";
 import { FranchiseService } from "./franchise.service.js";
+import { getValidJson, getValidParam } from "../../middlewares/validator.js";
+import { idParamSchema } from "../../validator/common.validator.js";
+import { createFranchiseSchema } from "../../validator/franchise.validator.js";
+
 export class FranchiseController {
-
-    private franchiseService: FranchiseService;
-
-    // Recibimos el servicio por inyección de dependencias
-    constructor(franchiseService: FranchiseService) {
-        this.franchiseService = franchiseService;
-    }
+    constructor(private franchiseService: FranchiseService) { }
 
     async getAllFranchises(c: Context): Promise<Response> {
-        try {
-            const franchises = await this.franchiseService.getAllFranchises();
-            return c.json(franchises, 200);
-        } catch (error) {
-            console.error("Error fetching franchises:", error);
-            return c.json({ error: "Error obtaining franchises" }, 500);
-        }
+        const franchises = await this.franchiseService.getAllFranchises();
+        return c.json(franchises, 200);
     }
 
     async getById(c: Context): Promise<Response> {
-        let idParam;
-
-        try {
-            idParam = Number(c.req.param("id"));
-
-            const franchise = await this.franchiseService.getById(idParam);
-            return c.json(franchise, 200);
-        } catch (error: any) {
-
-            if (error.message.includes("does not exists")) {
-                return c.json({ error: error.message }, 404);
-            }
-
-            return c.json({ error: "Error obtaining franchise " + idParam }, 500);
-        }
+        // 'id' ya viene tipado automáticamente según idParamSchema
+        const { id } = getValidParam(c, idParamSchema);
+        const franchise = await this.franchiseService.getById(id);
+        return c.json(franchise, 200);
     }
 
     async create(c: Context): Promise<Response> {
-        try {
+        // 'franchiseData' ya viene con .trim() y tipado según createFranchiseSchema
+        const franchiseData = getValidJson(c, createFranchiseSchema);
+        const newFranchise = await this.franchiseService.create(franchiseData);
+        return c.json(newFranchise, 201);
+    }
 
-            const franchiseData = await c.req.json();
-
-            const newFranchise = await this.franchiseService.create(franchiseData);
-
-            return c.json(newFranchise, 201);
-
-        } catch (error: any) {
-
-            // Validamos errores de lógica de negocio o de base de datos (como el nombre duplicado)
-            if (error.message.includes("already exists") || error.message.includes("obligatory")) {
-                return c.json({ error: error.message }, 400);
-            }
-
-            return c.json({ error: "Error creating franchise " + error }, 500);
-        }
+    async delete(c: Context): Promise<Response> {
+        const { id } = getValidParam(c, idParamSchema);
+        const deleted = await this.franchiseService.delete(id);
+        return c.json(deleted, 200);
     }
 }

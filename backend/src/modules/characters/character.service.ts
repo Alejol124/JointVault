@@ -1,42 +1,45 @@
-import type { ICharacterRepository, Character, CharacterRepository, CreateCharacterDTO } from "./character.repository.js";
+import type { ICharacterRepository, Character } from "./character.repository.js";
+import type { IFranchiseRepository } from "../franchises/franchise.repository.js";
 
 export class CharacterService {
 
-    constructor(private characterRepository: ICharacterRepository) {
-        this.characterRepository = characterRepository;
-    }
+    constructor(
+        private characterRepository: ICharacterRepository,
+        private franchiseRepository: IFranchiseRepository
+    ) { }
 
     getAllCharacters(): Promise<Character[]> {
         return this.characterRepository.findAll();
     }
 
-    async getById(id: number): Promise<Character | null> {
-        try {
-            const character = await this.characterRepository.findById(id);
-            if (character === null) {
-                throw new Error("The character does not exists")
-            }
-            return character;
-        } catch (error) {
-            throw error;
+    async getByFranchiseId(franchiseId: number): Promise<Character[]> {
+
+        const franchise = await this.franchiseRepository.findById(franchiseId);
+        if (!franchise) {
+            throw new Error(`The franchise ID ${franchiseId} does not exist.`);
         }
+
+        const characters = await this.characterRepository.findByFranchiseId(franchiseId);
+
+        return characters ?? [];
     }
-
-    // async create(dto: CreateCharacterDTO): Promise<Character | null> {
-    //     try {
-    //         const { name, franchise_id } = dto;
-    //         if (!name || name.trim() === "") {
-    //             throw new Error("The character name is obligatory")
-    //         }
-
-    //         if ( ) {
-
-    //         }
-
-    //     } catch (error: any) {
-    //         if (error.code = '23503') {
-    //             throw new Error("Franchise id does not exists")
-    //         }
-    //     }
-    // }
 }
+
+
+// async create(dto: CreateCharacterDTO): Promise<Character | null> {
+//     try {
+//         const { name, franchise_id } = dto;
+//         if (!name || name.trim() === "") {
+//             throw new Error("The character name is obligatory")
+//         }
+
+//         if ( ) {
+
+//         }
+
+//     } catch (error: any) {
+//         if (error.code = '23503') {
+//             throw new Error("Franchise id does not exists")
+//         }
+//     }
+// }

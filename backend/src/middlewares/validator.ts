@@ -1,6 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
 import type { ValidationTargets } from 'hono';
 import { z } from 'zod';
+import { Context } from 'hono';
 
 const createValidator = <T extends z.ZodType, Target extends keyof ValidationTargets>(
     target: Target,
@@ -27,3 +28,12 @@ export const validarJson = <T extends z.ZodType>(schema: T) =>
 
 export const validarParams = <T extends z.ZodType>(schema: T) =>
     createValidator('param', schema);
+
+// Helpers to obtain validated data from Zod 
+export const getValidJson = <T extends z.ZodType>(c: Context, _schema: T): z.infer<T> => {
+    return (c.req as any).valid('json');
+};
+
+export const getValidParam = <T extends z.ZodType>(c: Context, _schema: T): z.infer<T> => {
+    return (c.req as any).valid('param');
+};

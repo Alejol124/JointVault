@@ -1,20 +1,34 @@
-//app.ts Represent the application and does not depend on an open port. This will allow us to test routes directly using Hono's testing API.
 import { Hono } from 'hono';
+import type { ContentfulStatusCode } from 'hono/utils/http-status';
 import franchiseRouter from './modules/franchises/franchise.routes.js';
+import { AppError } from './utils/AppError.js';
 
-//Main application instance
 const app = new Hono();
 
-//ruta health
 app.get('/health', (c) => {
   return c.json({ status: 'ok' });
 });
 
 app.route("/api/franchises", franchiseRouter);
 
-// Handler for routes that does not exist
+// non-existent routes handler (404)
 app.notFound((c) => {
-  return c.json({ error: 'Not Found' }, 404)
-})
+  return c.json({ ok: false, error: 'Not Found' }, 404);
+});
+
+// Global Error handler
+app.onError((err, c) => {
+  if (err instanceof AppError) {
+    return c.json(
+      { ok: false, error: err.message },
+      err.statusCode as ContentfulStatusCode
+    );
+  }
+
+  // Unknown Errors (bugs, Network fail/BD)
+  console.error('Unexpected error:', err);
+  return c.json({ ok: false, error: 'Internal Server Error' }, 500);
+});
+
 
 export default app;
