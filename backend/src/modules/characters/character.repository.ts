@@ -13,14 +13,14 @@ export interface CreateCharacterDTO {
 }
 
 export interface ICharacterRepository {
-    findAll(): Promise<Character[]>;
-    findByFranchiseId(id: number): Promise<Character[] | null>;
+    getAll(): Promise<Character[]>;
+    getByFranchiseId(id: number): Promise<Character[] | null>;
     create(data: CreateCharacterDTO): Promise<Character>;
     delete(id: number): Promise<Character | null>;
 }
 
 export class CharacterRepository {
-    async findAll(): Promise<Character[]> {
+    async getAll(): Promise<Character[]> {
 
         const result = await pool.query<Character>(
             'SELECT id, name, franchise_id FROM characters ORDER BY id ASC'
@@ -28,7 +28,7 @@ export class CharacterRepository {
         return result.rows;
     }
 
-    async findByFranchiseId(franchiseId: Number): Promise<Character[] | null> {
+    async getByFranchiseId(franchiseId: Number): Promise<Character[] | null> {
         const result = await pool.query(
             'SELECT id, name, franchise_id FROM characters WHERE franchise_id = $1',
             [franchiseId]
