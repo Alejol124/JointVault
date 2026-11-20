@@ -13,14 +13,12 @@ export class FranchiseController {
     }
 
     async getById(c: Context): Promise<Response> {
-        // 'id' ya viene tipado automáticamente según idParamSchema
         const { id } = getValidParam(c, idParamSchema);
         const franchise = await this.franchiseService.getById(id);
         return c.json(franchise, 200);
     }
 
     async create(c: Context): Promise<Response> {
-        // 'franchiseData' ya viene con .trim() y tipado según createFranchiseSchema
         const franchiseData = getValidJson(c, createFranchiseSchema);
         const newFranchise = await this.franchiseService.create(franchiseData);
         return c.json(newFranchise, 201);

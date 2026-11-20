@@ -1,11 +1,11 @@
-import type { ICharacterRepository, Character, CreateCharacterDTO } from "./character.repository.js";
+import type { CharacterRepository, Character, CreateCharacterDTO } from "./character.repository.js";
 import { FranchiseService } from '../franchises/franchise.service.js'
 import { AppError } from "../../utils/AppError.js";
 import { handleDatabaseError } from "../../utils/dbErrorHandler.js";
 export class CharacterService {
 
     constructor(
-        private characterRepository: ICharacterRepository,
+        private characterRepository: CharacterRepository,
         private franchiseService: FranchiseService,
     ) { }
 

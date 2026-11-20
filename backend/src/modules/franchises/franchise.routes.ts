@@ -16,6 +16,6 @@ const franchiseController = new FranchiseController(franchiseService);
 franchiseRouter.get("/", (c) => franchiseController.getAllFranchises(c));
 franchiseRouter.get("/:id", validarParams(idParamSchema), (c) => franchiseController.getById(c));
 franchiseRouter.post("/", validarJson(createFranchiseSchema), (c) => franchiseController.create(c));
-franchiseRouter.delete("/", validarParams(idParamSchema), (c) => franchiseController.delete(c));
+franchiseRouter.delete("/:id", validarParams(idParamSchema), (c) => franchiseController.delete(c));
 
 export default franchiseRouter;

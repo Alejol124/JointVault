@@ -27,9 +27,10 @@ export function handleDatabaseError(error: any, customMessages?: DbErrorMessages
             );
 
         case '23503': // Foreign key violation
+        case '23001': // Restrict violation (ON DELETE RESTRICT)
             throw new AppError(
                 customMessages?.foreignKeyViolation || "Operation failed due to a reference constraint with related records.",
-                409 // Conflict (o 400 Bad Request si es al insertar)
+                409 // Conflict
             );
 
         case '23514': // Check constraint violation
