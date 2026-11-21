@@ -1,12 +1,10 @@
-import type { CharacterRepository, Character, CreateCharacterDTO } from "./character.repository.js";
-import { FranchiseService } from '../franchises/franchise.service.js'
+import type { Character, CreateCharacterDTO, UpdateCharacterDTO, ICharacterRepository } from "./character.repository.js";
 import { AppError } from "../../utils/AppError.js";
 import { handleDatabaseError } from "../../utils/dbErrorHandler.js";
 export class CharacterService {
 
     constructor(
-        private characterRepository: CharacterRepository,
-        private franchiseService: FranchiseService,
+        private characterRepository: ICharacterRepository,
     ) { }
 
     getAllCharacters(): Promise<Character[]> {
@@ -14,18 +12,11 @@ export class CharacterService {
     }
 
     async getByFranchiseId(franchiseId: number): Promise<Character[]> {
-
-        const franchise = await this.franchiseService.getById(franchiseId);
-        if (!franchise) {
-            throw new Error(`The franchise ID ${franchiseId} does not exist.`);
-        }
-
         const characters = await this.characterRepository.getByFranchiseId(franchiseId);
-
         return characters ?? [];
     }
 
-    async create(dto: CreateCharacterDTO): Promise<Character | null> {
+    async create(dto: CreateCharacterDTO): Promise<Character> {
         try {
             const { name, franchise_id } = dto;
 
@@ -48,7 +39,7 @@ export class CharacterService {
         }
     }
 
-    async delete(id: number): Promise<Character | null> {
+    async delete(id: number): Promise<Character> {
         try {
             const deletedCharacter = await this.characterRepository.delete(id);
             if (!deletedCharacter) {
@@ -63,5 +54,19 @@ export class CharacterService {
             })
         }
     }
-}
 
+    async update(id: number, dto: UpdateCharacterDTO): Promise<Character> {
+        try {
+            const { name, franchise_id } = dto;
+            const updatedCharacter = await this.characterRepository.update(id, dto);
+            if (!updatedCharacter) throw new AppError(`Character with ID ${id} does not exist`, 404);
+            return updatedCharacter;
+        } catch (error: any) {
+            if (error instanceof AppError) throw error;
+            handleDatabaseError(error, {
+                foreignKeyViolation: `Franchise with ID ${dto.franchise_id} does not exist`,
+                uniqueViolation: `Character "${dto.name}" already exists in this franchise`,
+            });
+        }
+    }
+}

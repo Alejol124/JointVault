@@ -1,4 +1,4 @@
-import type { IFranchiseRepository, Franchise, CreateFranchiseDTO } from "./franchise.repository.js";
+import type { IFranchiseRepository, Franchise, CreateFranchiseDTO, UpdateFranchiseDTO } from "./franchise.repository.js";
 import { AppError } from "../../utils/AppError.js";
 import { handleDatabaseError } from "../../utils/dbErrorHandler.js";
 
@@ -23,7 +23,7 @@ export class FranchiseService {
             const { name, uses_arcs } = dto;
 
             const created = await this.franchiseRepository.create({
-                name: name.trim(),
+                name: name,
                 uses_arcs
             });
 
@@ -53,6 +53,14 @@ export class FranchiseService {
             });
         }
     }
+
+    // async update(id: number, dto: UpdateFranchiseDTO): Promise<Franchise> {
+    //     try {
+    //         const { name, uses_arcs } = dto
+    //     } catch (error: any) {
+
+    //     }
+    // }
 
 }
 

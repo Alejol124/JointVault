@@ -23,10 +23,10 @@ const createValidator = <T extends z.ZodType, Target extends keyof ValidationTar
         }
     });
 
-export const validarJson = <T extends z.ZodType>(schema: T) =>
+export const validateJson = <T extends z.ZodType>(schema: T) =>
     createValidator('json', schema);
 
-export const validarParams = <T extends z.ZodType>(schema: T) =>
+export const validateParams = <T extends z.ZodType>(schema: T) =>
     createValidator('param', schema);
 
 // Helpers to obtain validated data from Zod 

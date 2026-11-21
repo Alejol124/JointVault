@@ -11,3 +11,11 @@ export const createCharacterSchema = z.object({
         .int("Franchise ID must be integer")
         .positive("Franchise ID must be greater than 0"),
 });
+
+export const updateCharacterSchema = createCharacterSchema
+    .partial()
+    .refine((data) => Object.keys(data).length > 0, {
+        message: "At least one field must be provided for update",
+    });
+
+export type UpdateCharacterDTO = z.infer<typeof updateCharacterSchema>;

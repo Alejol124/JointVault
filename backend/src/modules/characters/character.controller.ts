@@ -2,7 +2,7 @@ import { Context } from "hono";
 import { CharacterService } from "./character.service.js";
 import { getValidJson, getValidParam } from "../../middlewares/validator.js";
 import { idParamSchema } from "../../validator/common.validator.js";
-import { createCharacterSchema } from "../../validator/character.validator.js";
+import { createCharacterSchema, updateCharacterSchema } from "../../validator/character.validator.js";
 
 export class CharacterController {
     constructor(private characterService: CharacterService) { }
@@ -28,6 +28,13 @@ export class CharacterController {
         const { id } = getValidParam(c, idParamSchema);
         const deleted = await this.characterService.delete(id);
         return c.json(deleted, 200);
+    }
+
+    async update(c: Context): Promise<Response> {
+        const { id } = getValidParam(c, idParamSchema);
+        const characterData = getValidJson(c, updateCharacterSchema);
+        const updatedCharacter = await this.characterService.update(id, characterData);
+        return c.json(updateCharacterSchema, 200);
     }
 
 }
