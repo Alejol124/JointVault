@@ -29,6 +29,9 @@ export const validateJson = <T extends z.ZodType>(schema: T) =>
 export const validateParams = <T extends z.ZodType>(schema: T) =>
     createValidator('param', schema);
 
+export const validateQuery = <T extends z.ZodType>(schema: T) =>
+    createValidator('query', schema);
+
 // Helpers to obtain validated data from Zod 
 export const getValidJson = <T extends z.ZodType>(c: Context, _schema: T): z.infer<T> => {
     return (c.req as any).valid('json');
@@ -36,4 +39,9 @@ export const getValidJson = <T extends z.ZodType>(c: Context, _schema: T): z.inf
 
 export const getValidParam = <T extends z.ZodType>(c: Context, _schema: T): z.infer<T> => {
     return (c.req as any).valid('param');
+};
+
+// 2. Agrega el helper para obtener la query validada
+export const getValidQuery = <T extends z.ZodType>(c: Context, _schema: T): z.infer<T> => {
+    return (c.req as any).valid('query');
 };

@@ -1,91 +1,92 @@
 import pool from "../../database/pool.js";
 import type { QueryResultRow } from "pg";
 
-/* -- 3. Crear tabla Arcs (Depende de franchises)
-CREATE TABLE arcs (
-    id SERIAL PRIMARY KEY,
-    arc_name VARCHAR(60) NOT NULL,
-    sort_order INT,
-    franchise_id INT NOT NULL,
-    FOREIGN KEY (franchise_id) REFERENCES franchises (id) ON DELETE RESTRICT,
-
-    --Los arcos solo se permiten estar asociados a su misma franquicia
-    CONSTRAINT uq_arcs_id_franchise UNIQUE (id, franchise_id),
-	
-    --No permite el mismo nombre de arco en una franquicia, pero si en diferenes
-    CONSTRAINT uq_franchise_arc UNIQUE (franchise_id, arc_name)
-);
- */
-
-export interface Franchise extends QueryResultRow {
+export interface Arc extends QueryResultRow {
     id: number;
     arc_name: string;
-    sort_order?: number;
     franchise_id: number;
+    sort_order: number | null;
 }
 
 
-export interface CreateFranchiseDTO {
-    name: string;
-    uses_arcs: boolean;
-}
-export type UpdateFranchiseDTO = Partial<CreateFranchiseDTO>;
-
-
-export interface IFranchiseRepository {
-    findAll(): Promise<Franchise[]>;
-    findById(id: number): Promise<Franchise | null>;
-    create(data: CreateFranchiseDTO): Promise<Franchise>;
-    delete(id: number): Promise<Franchise | null>;
-    update(id: number, data: UpdateFranchiseDTO): Promise<Franchise | null>
+export interface CreateArcDTO {
+    arc_name: string;
+    franchise_id: number;
+    sort_order: number | null;
 }
 
-export class FranchiseRepository implements IFranchiseRepository {
-    async findAll(): Promise<Franchise[]> {
+export type UpdateArcDTO = {
+    arc_name?: string | undefined;
+    franchise_id?: number | undefined;
+    sort_order?: number | undefined;
+};
 
-        const result = await pool.query<Franchise>(
-            'SELECT id, name, uses_arcs FROM franchises ORDER BY id ASC'
+export interface IArcRepository {
+    getAll(): Promise<Arc[]>;
+    getByFranchiseId(id: number): Promise<Arc[]>;
+    create(data: CreateArcDTO): Promise<Arc>;
+    delete(id: number): Promise<Arc | null>
+    update(id: number, data: UpdateArcDTO): Promise<Arc | null>;
+};
+
+export class ArcRepository implements IArcRepository {
+
+    async getAll(): Promise<Arc[]> {
+        const result = await pool.query<Arc>(
+            `SELECT id, arc_name, sort_order, franchise_id 
+             FROM arcs 
+             ORDER BY franchise_id ASC, sort_order ASC NULLS LAST, id ASC`
         );
         return result.rows;
     }
 
-    async findById(id: number): Promise<Franchise | null> {
-        // Se añade <Franchise> para asegurar el tipo en la búsqueda
-        const result = await pool.query<Franchise>(
-            'SELECT id, name, uses_arcs FROM franchises WHERE id = $1',
-            [id]
+    async getByFranchiseId(franchiseId: number): Promise<Arc[]> {
+        const result = await pool.query<Arc>(
+            `SELECT id, arc_name, sort_order, franchise_id 
+             FROM arcs 
+             WHERE franchise_id = $1 
+             ORDER BY sort_order ASC NULLS LAST, id ASC`,
+            [franchiseId]
         );
-        return result.rows[0] ?? null;
+        return result.rows;
     }
 
-    async create(data: CreateFranchiseDTO): Promise<Franchise> {
-        const result = await pool.query<Franchise>(
-            'INSERT INTO franchises (name, uses_arcs) VALUES ($1, $2) RETURNING id, name, uses_arcs',
-            [data.name, data.uses_arcs]
+    async create(data: CreateArcDTO): Promise<Arc> {
+        const result = await pool.query<Arc>(
+            `INSERT INTO arcs (arc_name, sort_order, franchise_id) 
+             VALUES (
+                $1, 
+                COALESCE($2, (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM arcs WHERE franchise_id = $3)), 
+                $3
+             ) 
+             RETURNING id, arc_name, sort_order, franchise_id`,
+            [data.arc_name, data.sort_order ?? null, data.franchise_id]
         );
 
         if (!result.rows[0]) {
-            throw new Error("The franchise could not be created.");
+            throw new Error("The arc could not be created");
         }
+
         return result.rows[0];
     }
 
-    async delete(id: number): Promise<Franchise | null> {
-        const result = await pool.query<Franchise>(
-            'DELETE FROM franchises WHERE id = $1 RETURNING id, name, uses_arcs',
+    async delete(id: number): Promise<Arc | null> {
+        const result = await pool.query<Arc>(
+            'DELETE FROM arcs WHERE id = $1 RETURNING id, arc_name, sort_order, franchise_id',
             [id]
         );
         return result.rows[0] ?? null;
     }
 
-    async update(id: number, data: UpdateFranchiseDTO): Promise<Franchise | null> {
-        const result = await pool.query<Franchise>(
-            `UPDATE franchises 
-         SET name = COALESCE($1, name), 
-             uses_arcs = COALESCE($2, uses_arcs) 
-         WHERE id = $3 
-         RETURNING id, name, uses_arcs`,
-            [data.name, data.uses_arcs, id]
+    async update(id: number, data: UpdateArcDTO): Promise<Arc | null> {
+        const result = await pool.query<Arc>(
+            `UPDATE arcs 
+             SET arc_name = COALESCE($1, arc_name),
+                 sort_order = COALESCE($2, sort_order),            
+                 franchise_id = COALESCE($3, franchise_id) 
+             WHERE id = $4 
+             RETURNING id, arc_name, sort_order, franchise_id`,
+            [data.arc_name ?? null, data.sort_order ?? null, data.franchise_id ?? null, id]
         );
         return result.rows[0] ?? null;
     }

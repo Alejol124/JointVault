@@ -34,7 +34,7 @@ export class CharacterController {
         const { id } = getValidParam(c, idParamSchema);
         const characterData = getValidJson(c, updateCharacterSchema);
         const updatedCharacter = await this.characterService.update(id, characterData);
-        return c.json(updateCharacterSchema, 200);
+        return c.json(updatedCharacter, 200);
     }
 
 }

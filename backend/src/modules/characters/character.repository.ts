@@ -12,11 +12,11 @@ export interface CreateCharacterDTO {
     franchise_id: number;
 }
 
-// En character.repository.ts:
 export type UpdateCharacterDTO = {
     name?: string | undefined;
     franchise_id?: number | undefined;
 };
+
 export interface ICharacterRepository {
     getAll(): Promise<Character[]>;
     getByFranchiseId(franchiseId: number): Promise<Character[]>;

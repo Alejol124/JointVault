@@ -7,7 +7,7 @@ export class CharacterService {
         private characterRepository: ICharacterRepository,
     ) { }
 
-    getAllCharacters(): Promise<Character[]> {
+    async getAllCharacters(): Promise<Character[]> {
         return this.characterRepository.getAll();
     }
 
@@ -57,7 +57,6 @@ export class CharacterService {
 
     async update(id: number, dto: UpdateCharacterDTO): Promise<Character> {
         try {
-            const { name, franchise_id } = dto;
             const updatedCharacter = await this.characterRepository.update(id, dto);
             if (!updatedCharacter) throw new AppError(`Character with ID ${id} does not exist`, 404);
             return updatedCharacter;
