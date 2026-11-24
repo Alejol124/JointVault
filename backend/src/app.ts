@@ -4,6 +4,7 @@ import franchiseRouter from './modules/franchises/franchise.routes.js';
 import { AppError } from './utils/AppError.js';
 import characterRouter from './modules/characters/character.route.js';
 import ArcRouter from './modules/arcs/arc.route.js';
+import productLineRouter from './modules/product-lines/product-line.route.js';
 
 const app = new Hono();
 
@@ -14,6 +15,7 @@ app.get('/health', (c) => {
 app.route("/api/franchises", franchiseRouter);
 app.route("/api/characters", characterRouter);
 app.route("/api/arcs", ArcRouter)
+app.route("/api/product-lines", productLineRouter);
 
 // non-existent routes handler (404)
 app.notFound((c) => {

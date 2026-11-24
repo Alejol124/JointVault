@@ -13,12 +13,11 @@ import { FranchiseService } from '../franchises/franchise.service.js';
 const ArcRouter = new Hono();
 
 const franchiseRepository = new FranchiseRepository();
-const franchiseService = new FranchiseService(franchiseRepository);
-
 const arcRepository = new ArcRepository();
-const arcService = new ArcService(arcRepository, franchiseService);
-const arcController = new ArcController(arcService);
+const franchiseService = new FranchiseService(franchiseRepository, arcRepository);
 
+const arcService = new ArcService(arcRepository, franchiseService);
+const arcController = new ArcController(arcService);    
 
 ArcRouter.get("/", validateQuery(getArcsQuerySchema), (c) => arcController.getArcs(c));
 ArcRouter.post("/", validateJson(createArcSchema), (c) => arcController.create(c));

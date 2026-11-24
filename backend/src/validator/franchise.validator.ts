@@ -12,3 +12,9 @@ export const createFranchiseSchema = z.object({
                 : 'The field uses_arcs must be true or false',
     }),
 });
+
+export const updateFranchiseSchema = createFranchiseSchema
+    .partial()
+    .refine((data) => Object.keys(data).length > 0, {
+        message: "At least one field must be provided for update",
+    });

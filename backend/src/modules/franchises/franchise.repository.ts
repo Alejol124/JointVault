@@ -8,8 +8,8 @@ export interface Franchise extends QueryResultRow {
 }
 
 export interface CreateFranchiseDTO {
-    name: string;
-    uses_arcs: boolean;
+    name?: string | undefined;
+    uses_arcs?: boolean | undefined;
 }
 export type UpdateFranchiseDTO = Partial<CreateFranchiseDTO>;
 

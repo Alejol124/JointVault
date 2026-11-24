@@ -2,7 +2,7 @@ import type { Context } from "hono";
 import { FranchiseService } from "./franchise.service.js";
 import { getValidJson, getValidParam } from "../../middlewares/validator.js";
 import { idParamSchema } from "../../validator/common.validator.js";
-import { createFranchiseSchema } from "../../validator/franchise.validator.js";
+import { createFranchiseSchema, updateFranchiseSchema } from "../../validator/franchise.validator.js";
 
 export class FranchiseController {
     constructor(private franchiseService: FranchiseService) { }
@@ -28,5 +28,12 @@ export class FranchiseController {
         const { id } = getValidParam(c, idParamSchema);
         const deleted = await this.franchiseService.delete(id);
         return c.json(deleted, 200);
+    }
+
+    async update(c: Context): Promise<Response> {
+        const { id } = getValidParam(c, idParamSchema);
+        const franchiseData = getValidJson(c, updateFranchiseSchema);
+        const updatedFranchise = await this.franchiseService.update(id, franchiseData)
+        return c.json(updatedFranchise, 200);
     }
 }

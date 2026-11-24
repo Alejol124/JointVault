@@ -21,7 +21,19 @@ export type UpdateArcDTO = {
     sort_order?: number | undefined;
 };
 
-export interface IArcRepository {
+//This one is to avoid a circular dependency, 
+// franchiseService does not need to know everything about
+// arcs module
+export interface IArcChecker {
+    hasArcs(franchiseId: number): Promise<boolean>; // Agregado aquí
+}
+
+/*
+Como ArcRepository implementa IArcRepository, automáticamente 
+cumple con IArcChecker sin que tengas que cambiar ni una línea de tus consultas SQL.
+*/
+
+export interface IArcRepository extends IArcChecker {
     getAll(): Promise<Arc[]>;
     getByFranchiseId(id: number): Promise<Arc[]>;
     create(data: CreateArcDTO): Promise<Arc>;
@@ -90,4 +102,17 @@ export class ArcRepository implements IArcRepository {
         );
         return result.rows[0] ?? null;
     }
+
+    async hasArcs(franchiseId: number): Promise<boolean> {
+        const result = await pool.query<{ exists: boolean }>(
+            `SELECT EXISTS (
+            SELECT 1
+            FROM arcs
+            WHERE franchise_id = $1
+        )`,
+            [franchiseId]
+        );
+        return result.rows[0]?.exists ?? false;
+    }
+
 }

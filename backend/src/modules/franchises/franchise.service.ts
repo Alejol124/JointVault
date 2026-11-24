@@ -1,10 +1,14 @@
 import type { IFranchiseRepository, Franchise, CreateFranchiseDTO, UpdateFranchiseDTO } from "./franchise.repository.js";
 import { AppError } from "../../utils/AppError.js";
 import { handleDatabaseError } from "../../utils/dbErrorHandler.js";
+import type { IArcChecker } from "../arcs/arc.repository.js";
 
 export class FranchiseService {
 
-    constructor(private franchiseRepository: IFranchiseRepository) { }
+    constructor(
+        private franchiseRepository: IFranchiseRepository,
+        private arcChecker: IArcChecker,
+    ) { }
 
     getAllFranchises(): Promise<Franchise[]> {
         return this.franchiseRepository.findAll();
@@ -54,13 +58,34 @@ export class FranchiseService {
         }
     }
 
-    // async update(id: number, dto: UpdateFranchiseDTO): Promise<Franchise> {
-    //     try {
-    //         const { name, uses_arcs } = dto
-    //     } catch (error: any) {
+    async update(id: number, dto: UpdateFranchiseDTO): Promise<Franchise> {
+        try {
 
-    //     }
-    // }
+            if (dto.uses_arcs === false) {
+                const franchiseHasArcs = await this.arcChecker.hasArcs(id);
+                if (franchiseHasArcs) {
+                    throw new AppError(
+                        "Cannot disable arcs: this franchise still has arcs. Delete them first.",
+                        409
+                    );
+                }
+            }
+
+            const updatedFranchise = await this.franchiseRepository.update(id, dto);
+            if (!updatedFranchise) {
+                throw new AppError("The franchise does not exist", 404);
+            }
+
+            return updatedFranchise;
+
+        } catch (error: any) {
+            if (error instanceof AppError) throw error;
+
+            handleDatabaseError(error, {
+                uniqueViolation: `Franchise "${dto.name}" already exists.`
+            });
+        }
+    }
 
 }
 
